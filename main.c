@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
+#define IF(num) if(a >= num*16 && a<=(num+1)*16 - 1) { return num; }
 typedef uint16_t WORD;
 typedef uint32_t DWORD;
 typedef int32_t LONG;
@@ -25,131 +26,68 @@ typedef struct tagBITMAPINFOHEADER {
     DWORD biClrUsed=0;
     DWORD biClrImportant=0;
 } BITMAPINFOHEADER;
-void copyData1(BITMAPFILEHEADER & xd,char* buffer) {
-    memcpy(&xd.bfType, (const char*)buffer, 2);
-    memcpy(&xd.bfSize, (const char*)(buffer + 2), 4);
-    memcpy(&xd.bfReserved1, (const char*)(buffer + 6), 2);
-    memcpy(&xd.bfReserved2, (const char*)(buffer + 8), 2);
-    memcpy(&xd.bfOffBits, (const char*)(buffer + 10), 4);
+void copyData1(BITMAPFILEHEADER & file_Header,char* buffer) {
+    memcpy(&file_Header.bfType, (const char*)buffer, 2);
+    memcpy(&file_Header.bfSize, (const char*)(buffer + 2), 4);
+    memcpy(&file_Header.bfReserved1, (const char*)(buffer + 6), 2);
+    memcpy(&file_Header.bfReserved2, (const char*)(buffer + 8), 2);
+    memcpy(&file_Header.bfOffBits, (const char*)(buffer + 10), 4);
 }
-void copyData2(BITMAPINFOHEADER& xdd, char* buffer) {
-    memcpy(&xdd.biSize, (const char*)(buffer + 14), 4);
-    memcpy(&xdd.biWidth, (const char*)(buffer + 18), 4);
-    memcpy(&xdd.biHeight, (const char*)(buffer + 22), 4);
-    memcpy(&xdd.biPlanes, (const char*)(buffer + 26), 2);
-    memcpy(&xdd.biBitCount, (const char*)(buffer + 28), 2);
-    memcpy(&xdd.biCompression, (const char*)(buffer + 30), 4);
-    memcpy(&xdd.biSizeImage, (const char*)(buffer + 34), 4);
-    memcpy(&xdd.biXPelsPerMeter, (const char*)(buffer + 38), 4);
-    memcpy(&xdd.biYPelsPerMeter, (const char*)(buffer + 42), 4);
-    memcpy(&xdd.biClrUsed, (const char*)(buffer + 46), 4);
-    memcpy(&xdd.biClrImportant, (const char*)(buffer + 50), 4);
+void copyData2(BITMAPINFOHEADER& info_Header, char* buffer) {
+    memcpy(&info_Header.biSize, (const char*)(buffer + 14), 4);
+    memcpy(&info_Header.biWidth, (const char*)(buffer + 18), 4);
+    memcpy(&info_Header.biHeight, (const char*)(buffer + 22), 4);
+    memcpy(&info_Header.biPlanes, (const char*)(buffer + 26), 2);
+    memcpy(&info_Header.biBitCount, (const char*)(buffer + 28), 2);
+    memcpy(&info_Header.biCompression, (const char*)(buffer + 30), 4);
+    memcpy(&info_Header.biSizeImage, (const char*)(buffer + 34), 4);
+    memcpy(&info_Header.biXPelsPerMeter, (const char*)(buffer + 38), 4);
+    memcpy(&info_Header.biYPelsPerMeter, (const char*)(buffer + 42), 4);
+    memcpy(&info_Header.biClrUsed, (const char*)(buffer + 46), 4);
+    memcpy(&info_Header.biClrImportant, (const char*)(buffer + 50), 4);
 }
-void printData(BITMAPFILEHEADER& xd, BITMAPINFOHEADER& xdd) {
-    printf("BITMAPFILEHEADER: \nbfType: \t\t0x%X (BM)\nbfSize: \t\t%d\nbfReserved1: \t\t0x%X\nbfReserved2: \t\t0x%X\nbfOffBits: \t\t%d\n\n", xd.bfType, xd.bfSize, xd.bfReserved1, xd.bfReserved2, xd.bfOffBits);
-    printf("BITMAPINFOHEADER: \nbiSize: \t\t%d\nbiWidth: \t\t%d\nbiHeight: \t\t%d\nbiPlanes: \t\t%d\nbiBitCount: \t\t%d\nbiCompression: \t\t%d\nbiSizeImage: \t\t%d\nbiXPelsPerMeter: \t%d\nbiYPelsPerMeter: \t%d\nbiClrUsed: \t\t%d\nbiClrImportant: \t%d\n", xdd.biSize, xdd.biWidth, xdd.biHeight, xdd.biPlanes, xdd.biBitCount, xdd.biCompression, xdd.biSizeImage, xdd.biXPelsPerMeter, xdd.biYPelsPerMeter, xdd.biClrUsed, xdd.biClrImportant);
+void printData(BITMAPFILEHEADER& file_Header, BITMAPINFOHEADER& info_Header) {
+    printf("BITMAPFILEHEADER: \nbfType: \t\t0x%X (BM)\nbfSize: \t\t%d\nbfReserved1: \t\t0x%X\nbfReserved2: \t\t0x%X\nbfOffBits: \t\t%d\n\n", file_Header.bfType, file_Header.bfSize, file_Header.bfReserved1, file_Header.bfReserved2, file_Header.bfOffBits);
+    printf("BITMAPINFOHEADER: \nbiSize: \t\t%d\nbiWidth: \t\t%d\nbiHeight: \t\t%d\nbiPlanes: \t\t%d\nbiBitCount: \t\t%d\nbiCompression: \t\t%d\nbiSizeImage: \t\t%d\nbiXPelsPerMeter: \t%d\nbiYPelsPerMeter: \t%d\nbiClrUsed: \t\t%d\nbiClrImportant: \t%d\n", info_Header.biSize, info_Header.biWidth, info_Header.biHeight, info_Header.biPlanes, info_Header.biBitCount, info_Header.biCompression, info_Header.biSizeImage, info_Header.biXPelsPerMeter, info_Header.biYPelsPerMeter, info_Header.biClrUsed, info_Header.biClrImportant);
 }
 int checkNum(unsigned char& num) {
     int a = int(num);
-    if (a >= 0 && a <= 15) {
-        return 0;
+    for (int i = 0; i < 16; i++) {
+        IF(i);
     }
-    else if (a >= 16 && a <= 31) {
-        return 1;
-    }
-    else if (a >= 32 && a <= 47) {
-        return 2;
-    }
-    else if (a >= 48 && a <= 63) {
-        return 3;
-    }
-    else if (a >= 64 && a <= 79) {
-        return 4;
-    }
-    else if (a >= 80 && a <= 95) {
-        return 5;
-    }
-    else if (a >= 96 && a <= 111) {
-        return 6;
-    }
-    else if (a >= 112 && a <= 127) {
-        return 7;
-    }
-    else if (a >= 128 && a <= 143) {
-        return 8;
-    }
-    else if (a >= 144 && a <= 159) {
-        return 9;
-    }
-    else if (a >= 160 && a <= 175) {
-        return 10;
-    }
-    else if (a >= 176 && a <= 191) {
-        return 11;
-    }
-    else if (a >= 192 && a <= 207) {
-        return 12;
-    }
-    else if (a >= 208 && a <= 223) {
-        return 13;
-    }
-    else if (a >= 224 && a <= 239) {
-        return 14;
-    }
-    else if (a >= 240 && a <= 255) {
-        return 15;
-    }
-    else {
-        printf("Something's bad.");
-        return EXIT_FAILURE;
-    }
+    return EXIT_FAILURE;
 }
 void printIt(int* counter, int sum, const char* mess) {
     printf("\n\n%s: \n\n", mess);
-    printf("0-15: %.2lf%%\n", (counter[0] / (double)sum)*100);
-    printf("16-31: %.2lf%%\n", (counter[1] / (double)sum) * 100);
-    printf("32-47: %.2lf%%\n", (counter[2] / (double)sum) * 100);
-    printf("48-63: %.2lf%%\n", (counter[3] / (double)sum) * 100);
-    printf("64-79: %.2lf%%\n", (counter[4] / (double)sum) * 100);
-    printf("80-95: %.2lf%%\n", (counter[5] / (double)sum) * 100);
-    printf("96-111: %.2lf%%\n", (counter[6] / (double)sum) * 100);
-    printf("112-127: %.2lf%%\n", (counter[7] / (double)sum) * 100);
-    printf("128-143: %.2lf%%\n", (counter[8] / (double)sum) * 100);
-    printf("144-156: %.2lf%%\n", (counter[9] / (double)sum) * 100);
-    printf("160-175: %.2lf%%\n", (counter[10] / (double)sum) * 100);
-    printf("176-191: %.2lf%%\n", (counter[11] / (double)sum) * 100);
-    printf("192-207: %.2lf%%\n", (counter[12] / (double)sum) * 100);
-    printf("208-223: %.2lf%%\n", (counter[13] / (double)sum) * 100);
-    printf("224-239: %.2lf%%\n", (counter[14] / (double)sum) * 100);
-    printf("240-255: %.2lf%%\n", (counter[15] / (double)sum) * 100);
-
+    for (int i = 0,j=0; i < 16;j++, i ++)
+        printf("%d-%d: %.2lf%%\n", 16*i,16*i+15, (counter[j] / (double)sum) * 100);
 }
-void histogramate(BITMAPFILEHEADER& xd, BITMAPINFOHEADER& xdd, char* buffer) {
-    int offset = xd.bfSize - xdd.biSizeImage;
-    int padding =((xdd.biWidth*3) % 4);
+void histogramate(BITMAPFILEHEADER& file_Header, BITMAPINFOHEADER& info_Header, char* buffer) {
+    int offset = file_Header.bfSize - info_Header.biSizeImage;
+    int padding =((info_Header.biWidth*3) % 4);
     int countBlue[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
     int countGreen[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
     int countRed[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
     // for every row
-    for (int i = 0; i < xdd.biHeight; i++) {
+    for (int i = 0; i < info_Header.biHeight; i++) {
         // for every pixel (triple)
-        for (int j = 0; j < xdd.biWidth*3; j += 3) {
+        for (int j = 0; j < info_Header.biWidth*3; j += 3) {
             unsigned char buffBlue;
             int b=0;
             memset(&buffBlue, 0, sizeof(char));
-            memcpy(&buffBlue, (const char*)(buffer + offset + j + i * (xdd.biWidth*3 + padding)), 1);
+            memcpy(&buffBlue, (const char*)(buffer + offset + j + i * (info_Header.biWidth*3 + padding)), 1);
             b = checkNum(buffBlue);
             countBlue[b]++;
 
             unsigned char buffGreen;
             memset(&buffGreen, 0, sizeof(char));
-            memcpy(&buffGreen, (const char*)(buffer + offset + j + i * (xdd.biWidth*3 + padding) + 1), 1);
+            memcpy(&buffGreen, (const char*)(buffer + offset + j + i * (info_Header.biWidth*3 + padding) + 1), 1);
             b = checkNum(buffGreen);
             countGreen[b]++;
 
             unsigned char buffRed;
             memset(&buffRed, 0, sizeof(char));
-            memcpy(&buffRed, (const char*)(buffer + offset + j + i * (xdd.biWidth*3 + padding) + 2), 1);
+            memcpy(&buffRed, (const char*)(buffer + offset + j + i * (info_Header.biWidth*3 + padding) + 2), 1);
             b = checkNum(buffRed);
             countRed[b]++;
             //printf("Blue: %X Green: %X Red: %X\n", buffBlue, buffGreen, buffRed);
@@ -160,30 +98,31 @@ void histogramate(BITMAPFILEHEADER& xd, BITMAPINFOHEADER& xdd, char* buffer) {
     int sum = 0;
     for (int i = 0; i < 16; i++)
         sum += countBlue[i];
-    if (xdd.biHeight * xdd.biWidth != sum) {
+    // handle error
+    if (info_Header.biHeight * info_Header.biWidth != sum) {
         printf("Number of pixels in the histogram does noot match number of pixels in the image");
     }
     printIt(countBlue, sum, "Blue");
     printIt(countGreen, sum, "Green");
     printIt(countRed, sum, "Red");
 }
-void grayScaleMe(BITMAPFILEHEADER& xd, BITMAPINFOHEADER& xdd, char* buffer, FILE* rfile) {
+void grayScaleMe(BITMAPFILEHEADER& file_Header, BITMAPINFOHEADER& info_Header, char* buffer, FILE* rfile) {
     // copy headers
-    fwrite(buffer, 14 + xdd.biSize, 1, rfile);
-    int offset = xd.bfSize - xdd.biSizeImage;
-    int padding = ((xdd.biWidth * 3) % 4);
+    fwrite(buffer, 14 + info_Header.biSize, 1, rfile);
+    int offset = file_Header.bfSize - info_Header.biSizeImage;
+    int padding = ((info_Header.biWidth * 3) % 4);
     // go through pixels
-    for (int i = 0; i < xdd.biHeight; i++) {
-        for (int j = 0; j < xdd.biWidth * 3; j += 3) {
+    for (int i = 0; i < info_Header.biHeight; i++) {
+        for (int j = 0; j < info_Header.biWidth * 3; j += 3) {
             unsigned char buffBlue;
             memset(&buffBlue, 0, sizeof(char));
-            memcpy(&buffBlue, (const char*)(buffer + offset + j + i * (xdd.biWidth * 3 + padding)), 1);
+            memcpy(&buffBlue, (const char*)(buffer + offset + j + i * (info_Header.biWidth * 3 + padding)), 1);
             unsigned char buffGreen;
             memset(&buffGreen, 0, sizeof(char));
-            memcpy(&buffGreen, (const char*)(buffer + offset + j + i * (xdd.biWidth * 3 + padding) + 1), 1);
+            memcpy(&buffGreen, (const char*)(buffer + offset + j + i * (info_Header.biWidth * 3 + padding) + 1), 1);
             unsigned char buffRed;
             memset(&buffRed, 0, sizeof(char));
-            memcpy(&buffRed, (const char*)(buffer + offset + j + i * (xdd.biWidth * 3 + padding) + 2), 1);
+            memcpy(&buffRed, (const char*)(buffer + offset + j + i * (info_Header.biWidth * 3 + padding) + 2), 1);
             int mean =  (int(buffBlue) + int(buffGreen) + int(buffRed)) / 3;
             // append to the file
             char g[3];
@@ -194,7 +133,6 @@ void grayScaleMe(BITMAPFILEHEADER& xd, BITMAPINFOHEADER& xdd, char* buffer, FILE
         }
     }
 }
-//DRIVER CODE
 int main(int argc, char** argv) {
     // Open for read in binary mode
     FILE* file = NULL;
@@ -228,22 +166,22 @@ int main(int argc, char** argv) {
     }
 
     // copying data to the first structure
-    BITMAPFILEHEADER XD;
-    copyData1(XD, buffer);
+    BITMAPFILEHEADER fileHeader;
+    copyData1(fileHeader, buffer);
 
     // copying data to the second structure
-    BITMAPINFOHEADER XDD;
-    copyData2(XDD, buffer);
+    BITMAPINFOHEADER infoHeader;
+    copyData2(infoHeader, buffer);
 
     // print data from requirements if 1 command line argument
     if (argc == 2) {
-        printData(XD, XDD);
+        printData(fileHeader, infoHeader);
     }
 
     // generate histogram if 1 command line argument
     if (argc == 2) {
-        if (XDD.biCompression != 0 || XDD.biBitCount != 24)
-            histogramate(XD, XDD, buffer);
+        if (infoHeader.biCompression != '0' || infoHeader.biBitCount != '24')
+            histogramate(fileHeader, infoHeader, buffer);
         else
             printf("Histogram claculation is unsupported.");
     }
@@ -258,7 +196,7 @@ int main(int argc, char** argv) {
             return EXIT_FAILURE;
         }
         
-        grayScaleMe(XD, XDD, buffer,rfile);
+        grayScaleMe(fileHeader, infoHeader, buffer,rfile);
 
         // Close the stream if it is not null
         if (rfile) {
