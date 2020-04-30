@@ -8,24 +8,24 @@ typedef uint16_t WORD;
 typedef uint32_t DWORD;
 typedef int32_t LONG;
 typedef struct tagBITMAPFILEHEADER {
-    WORD  bfType = 0;
-    DWORD bfSize = 0;
-    WORD  bfReserved1 = 0;
-    WORD  bfReserved2 = 0;
-    DWORD bfOffBits = 0;
+    WORD  bfType;
+    DWORD bfSize;
+    WORD  bfReserved1;
+    WORD  bfReserved2;
+    DWORD bfOffBits;
 } BITMAPFILEHEADER;
 typedef struct tagBITMAPINFOHEADER {
-    DWORD biSize = 0;
-    LONG  biWidth = 0;
-    LONG  biHeight = 0;
-    WORD  biPlanes = 0;
-    WORD  biBitCount = 0;
-    DWORD biCompression = 0;
-    DWORD biSizeImage = 0;
-    LONG  biXPelsPerMeter = 0;
-    LONG  biYPelsPerMeter = 0;
-    DWORD biClrUsed = 0;
-    DWORD biClrImportant = 0;
+    DWORD biSize;
+    LONG  biWidth;
+    LONG  biHeight;
+    WORD  biPlanes;
+    WORD  biBitCount;
+    DWORD biCompression;
+    DWORD biSizeImage;
+    LONG  biXPelsPerMeter;
+    LONG  biYPelsPerMeter;
+    DWORD biClrUsed;
+    DWORD biClrImportant;
 } BITMAPINFOHEADER;
 void copyData1(BITMAPFILEHEADER* file_Header, char* buffer) {
     memcpy(&file_Header->bfType, (const char*)buffer, 2);
@@ -51,8 +51,29 @@ void printData(BITMAPFILEHEADER* file_Header, BITMAPINFOHEADER* info_Header) {
     printf("BITMAPFILEHEADER: \nbfType: \t\t0x%X (BM)\nbfSize: \t\t%d\nbfReserved1: \t\t0x%X\nbfReserved2: \t\t0x%X\nbfOffBits: \t\t%d\n\n", file_Header->bfType, file_Header->bfSize, file_Header->bfReserved1, file_Header->bfReserved2, file_Header->bfOffBits);
     printf("BITMAPINFOHEADER: \nbiSize: \t\t%d\nbiWidth: \t\t%d\nbiHeight: \t\t%d\nbiPlanes: \t\t%d\nbiBitCount: \t\t%d\nbiCompression: \t\t%d\nbiSizeImage: \t\t%d\nbiXPelsPerMeter: \t%d\nbiYPelsPerMeter: \t%d\nbiClrUsed: \t\t%d\nbiClrImportant: \t%d\n", info_Header->biSize, info_Header->biWidth, info_Header->biHeight, info_Header->biPlanes, info_Header->biBitCount, info_Header->biCompression, info_Header->biSizeImage, info_Header->biXPelsPerMeter, info_Header->biYPelsPerMeter, info_Header->biClrUsed, info_Header->biClrImportant);
 }
-int checkNum(unsigned char& num) {
-    int a = int(num);
+void strreverse(char* begin, char* end) {
+	char aux;
+	while(end>begin)
+		aux=*end, *end--=*begin, *begin++=aux;
+}
+
+void itoa(int value, char* str, int base) {
+	static char num[] = "0123456789abcdefghijklmnopqrstuvwxyz";
+	char* wstr=str;
+	int sign;
+	// Validate base
+	if (base<2 || base>35){ *wstr='\0'; return; }
+	// Take care of sign
+	if ((sign=value) < 0) value = -value;
+	// Conversion. Number is reversed.
+	do *wstr++ = num[value%base]; while(value/=base);
+	if(sign<0) *wstr++='-';
+	*wstr='\0';
+	// Reverse string
+	strreverse(str,wstr-1);
+}
+int checkNum(unsigned char* num) {
+    int a = (int)*num;
     for (int i = 0; i < 16; i++) {
         IF(i);
     }
@@ -77,19 +98,19 @@ void histogramate(BITMAPFILEHEADER* file_Header, BITMAPINFOHEADER* info_Header, 
             int b = 0;
             memset(&buffBlue, 0, sizeof(char));
             memcpy(&buffBlue, (const char*)(buffer + offset + j + i * (info_Header->biWidth * 3 + padding)), 1);
-            b = checkNum(buffBlue);
+            b = checkNum(&buffBlue);
             countBlue[b]++;
 
             unsigned char buffGreen;
             memset(&buffGreen, 0, sizeof(char));
             memcpy(&buffGreen, (const char*)(buffer + offset + j + i * (info_Header->biWidth * 3 + padding) + 1), 1);
-            b = checkNum(buffGreen);
+            b = checkNum(&buffGreen);
             countGreen[b]++;
 
             unsigned char buffRed;
             memset(&buffRed, 0, sizeof(char));
             memcpy(&buffRed, (const char*)(buffer + offset + j + i * (info_Header->biWidth * 3 + padding) + 2), 1);
-            b = checkNum(buffRed);
+            b = checkNum(&buffRed);
             countRed[b]++;
             //printf("Blue: %X Green: %X Red: %X\n", buffBlue, buffGreen, buffRed);
         }
@@ -124,10 +145,10 @@ void grayScaleMe(BITMAPFILEHEADER* file_Header, BITMAPINFOHEADER* info_Header, c
             unsigned char buffRed;
             memset(&buffRed, 0, sizeof(char));
             memcpy(&buffRed, (const char*)(buffer + offset + j + i * (info_Header->biWidth * 3 + padding) + 2), 1);
-            int mean = (int(buffBlue) + int(buffGreen) + int(buffRed)) / 3;
+            int mean = ((int)buffBlue + (int)buffGreen + (int)buffRed) / 3;
             // append to the file
             char g[3];
-            _itoa(mean, g, 16);
+            itoa(mean, g, 16);
             fwrite(g, 1, 1, rfile);
             fwrite(g, 1, 1, rfile);
             fwrite(g, 1, 1, rfile);
@@ -145,7 +166,7 @@ int main(int argc, char** argv) {
     }
 
     // obtain file size
-    long fsize = NULL;
+    long fsize = 0;
     fseek(file, 0, SEEK_END);
     fsize = ftell(file);
     rewind(file);
@@ -181,10 +202,10 @@ int main(int argc, char** argv) {
 
     // generate histogram if 1 command line argument
     if (argc == 2) {
-        if (infoHeader.biCompression != '0' || infoHeader.biBitCount != '24')
+        if (infoHeader.biCompression == 0 && infoHeader.biBitCount == 24)
             histogramate(&fileHeader, &infoHeader, buffer);
         else
-            printf("Histogram claculation is unsupported.");
+            printf("Histogram calculation is unsupported.");
     }
     //turn into grayscale
     if (argc == 3) {
