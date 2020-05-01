@@ -76,10 +76,36 @@ void itoa(int value, char* str, int base) {
 
 int checkNum(unsigned char* num) {
     int a = (int)*num;
-    for (int i = 0; i < 16; i++) {
-        IF(i);
-    }
-    return EXIT_FAILURE;
+    _asm mov eax, a
+    _asm push ebx
+    _asm push ecx
+    _asm xor ebx, ebx
+    _asm loop_start:
+    _asm mov ecx, ebx
+    _asm imul ecx, 0x00000010
+    _asm cmp eax, ecx
+    _asm jl loop_check
+    _asm mov ecx, ebx
+    _asm inc ecx
+    _asm imul ecx, 0x00000010
+    _asm dec ecx
+    _asm cmp eax, ecx
+    _asm jg loop_check
+    _asm mov eax, ebx
+    _asm pop ecx
+    _asm pop ebx
+    _asm jmp _return_
+    _asm loop_check:
+    _asm inc ebx
+    _asm cmp ebx, 0x00000010
+    _asm jb loop_start
+    _asm pop ecx
+    _asm pop ebx
+    _asm xor eax, eax
+    _asm inc eax
+    _asm _return_:
+    _asm mov a, eax
+    return a;
 }
 void printIt(int* counter, int sum, const char* mess) {
     printf("\n\n%s: \n\n", mess);
