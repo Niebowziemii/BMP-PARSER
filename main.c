@@ -22,8 +22,8 @@ int main(int argc, char** argv) {
     }
 
     // copy the content to the buffer
-    size_t num_of_bytes_in_the_file = fread(buffer, 1,(*fsize), file);
-    if (num_of_bytes_in_the_file != *fsize) {
+    size_t ostensible_file_size= fread(buffer, 1,(*fsize), file);
+    if (ostensible_file_size != *fsize) {
         printf("Unable to read a file.");
         return EXIT_FAILURE;
     }
@@ -31,10 +31,12 @@ int main(int argc, char** argv) {
     // print data and histogram from requirements if 1 command line argument
     if (argc == 2) {
         print_data(buffer);
-        if (BICOMPRESSION(buffer) == 0 && BIBITCOUNT(buffer) == 24)
+        if (BICOMPRESSION(buffer) == 0 && BIBITCOUNT(buffer) == 24){
             generate_histogram(buffer);
-        else
+        }
+        else{
             printf("Histogram calculation is unsupported.");
+        }
     }
 
     //turn into grayscale if 2 command line arguments
