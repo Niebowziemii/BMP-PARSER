@@ -90,42 +90,42 @@
 #endif
 void print_data(char* buffer) {
     printf("BITMAPFILEHEADER:\
-            \
-            \nbf_type: \t\t0x%X\t%d (BM)\n\
-            bf_size: \t\t0x%X\t%d\n\
-            bf_reserved1: \t\t0x%X\t%d\n\
-            bf_reserved2: \t\t0x%X\t%d\n\
-            bf_off_bits: \t\t0x%X\t%d\n\n",\
-            BFTYPE(buffer), BFTYPE(buffer),\
-            BFSIZE(buffer), BFSIZE(buffer),\
-            BFRESERVED1(buffer), BFRESERVED1(buffer),\
-            BFRESERVED2(buffer), BFRESERVED2(buffer),\
-            BFOFFBITS(buffer), BFOFFBITS(buffer));
+\
+\nbf_type: \t\t0x%X\t%d (BM)\n\
+bf_size: \t\t0x%X\t%d\n\
+bf_reserved1: \t\t0x%X\t%d\n\
+bf_reserved2: \t\t0x%X\t%d\n\
+bf_off_bits: \t\t0x%X\t%d\n\n",\
+BFTYPE(buffer), BFTYPE(buffer),\
+BFSIZE(buffer), BFSIZE(buffer),\
+BFRESERVED1(buffer), BFRESERVED1(buffer),\
+BFRESERVED2(buffer), BFRESERVED2(buffer),\
+BFOFFBITS(buffer), BFOFFBITS(buffer));
 
     printf("BITMAPINFOHEADER:\
-            \
-            \nbi_size: \t\t0x%X\t%d\n\
-            bi_width: \t\t0x%X\t%d\n\
-            bi_height: \t\t0x%X\t%d\n\
-            bi_planes: \t\t0x%X\t%d\n\
-            bi_bit_count: \t\t0x%X\t%d\n\
-            bi_compression: \t\t0x%X\t%d\n\
-            bi_size_image: \t\t0x%X\t%d\n\
-            bi_x_pels_per_meter: \t0x%X\t%d\n\
-            bi_y_pels_per_meter: \t0x%X\t%d\n\
-            bi_clr_used: \t\t0x%X\t%d\n\
-            bi_clr_important: \t0x%X\t%d\n",\
-            BISIZE(buffer), BISIZE(buffer),\
-            BIWIDTH(buffer), BIWIDTH(buffer),\
-            BIHEIGHT(buffer), BIHEIGHT(buffer),\
-            BIPLANES(buffer), BIPLANES(buffer),\
-            BIBITCOUNT(buffer), BIBITCOUNT(buffer),\
-            BICOMPRESSION(buffer), BICOMPRESSION(buffer),\
-            BISIZEIMAGE(buffer), BISIZEIMAGE(buffer),\
-            BIXPERLSPERMETER(buffer), BIXPERLSPERMETER(buffer),\
-            BIYPERLSPERMETER(buffer), BIYPERLSPERMETER(buffer),\
-            BICLRUSED(buffer), BICLRUSED(buffer),\
-            BICLRIMPORTANT(buffer), BICLRIMPORTANT(buffer));
+\
+\nbi_size: \t\t0x%X\t%d\n\
+bi_width: \t\t0x%X\t%d\n\
+bi_height: \t\t0x%X\t%d\n\
+bi_planes: \t\t0x%X\t%d\n\
+bi_bit_count: \t\t0x%X\t%d\n\
+bi_compression: \t0x%X\t%d\n\
+bi_size_image: \t\t0x%X\t%d\n\
+bi_x_pels_per_meter: \t0x%X\t%d\n\
+bi_y_pels_per_meter: \t0x%X\t%d\n\
+bi_clr_used: \t\t0x%X\t%d\n\
+bi_clr_important: \t0x%X\t%d\n",\
+BISIZE(buffer), BISIZE(buffer),\
+BIWIDTH(buffer), BIWIDTH(buffer),\
+BIHEIGHT(buffer), BIHEIGHT(buffer),\
+BIPLANES(buffer), BIPLANES(buffer),\
+BIBITCOUNT(buffer), BIBITCOUNT(buffer),\
+BICOMPRESSION(buffer), BICOMPRESSION(buffer),\
+BISIZEIMAGE(buffer), BISIZEIMAGE(buffer),\
+BIXPERLSPERMETER(buffer), BIXPERLSPERMETER(buffer),\
+BIYPERLSPERMETER(buffer), BIYPERLSPERMETER(buffer),\
+BICLRUSED(buffer), BICLRUSED(buffer),\
+BICLRIMPORTANT(buffer), BICLRIMPORTANT(buffer));
 }
 int check_num(unsigned char* num) {
     int a = (int)*num;
