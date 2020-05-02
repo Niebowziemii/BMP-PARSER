@@ -52,7 +52,7 @@
 #ifndef BICLRIMPORTANT
 #define BICLRIMPORTANT *((uint32_t*)&buffer[50])
 #endif// !BICLRIMPORTANT
-#ifndef IF(num)
+#ifndef IF
 #define IF(num) if(a >= num*16 && a<=(num+1)*16 - 1) { return num; }
 #endif
 void printData(char* buffer) {
