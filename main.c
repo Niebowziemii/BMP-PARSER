@@ -44,7 +44,7 @@ int main(int argc, char** argv) {
         FILE* result_file = create_a_file_from_name_stored_in_main_argument_list(argv, 2, "wb");
         if (result_file) {
             if (BICOMPRESSION(buffer) == 0 && BIBITCOUNT(buffer) == 24)
-                turn_file_into_grayscale(buffer, result_file);
+                create_a_copy_of_given_file_in_grayscale(buffer, result_file);
             else
                 printf("Grayscale convertion is unsupported.");
             fclose(result_file);
