@@ -198,7 +198,7 @@ void generate_histogram(char* buffer) {
     print_histogram_colour_data((count+16), sum, "Green");
     print_histogram_colour_data((count+32), sum, "Red");
 }
-void turn_file_into_grayscale(char* buffer, FILE * rfile) {
+void create_a_copy_of_given_file_in_grayscale(char* buffer, FILE * rfile) {
     // copy headers
     fwrite(buffer, 14 + BISIZE(buffer), 1, rfile);
     int offset = BFSIZE(buffer) - BISIZEIMAGE(buffer);
