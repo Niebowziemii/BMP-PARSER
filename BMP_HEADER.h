@@ -85,9 +85,6 @@
 #endif// !BICLRIMPORTANT
 #define BICLRIMPORTANT(name) *((uint32_t*)&name[50])
 
-#ifndef IF(num)
-#define IF(num) if(a >= num*16 && a<=(num+1)*16 - 1) { return num; }
-#endif
 void print_data(char* buffer) {
     printf("BITMAPFILEHEADER:\
 \
@@ -168,9 +165,8 @@ void print_histogram_colour_data(int* counter, int sum, const char* mess) {
 void generate_histogram(char* buffer) {
     int offset = BFSIZE(buffer) - BISIZEIMAGE(buffer);
     int padding = ((BIWIDTH(buffer) * 3) % 4);
-    int count_blue[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-    int count_green[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-    int count_red[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    int count[48];
+    memset(&count, 0, sizeof(int)*48);
     // for every row
     for (unsigned i = 0; i < BIHEIGHT(buffer); i++) {
         // for every pixel (triple)
@@ -178,29 +174,29 @@ void generate_histogram(char* buffer) {
             unsigned char buff_blue = (unsigned char)(buffer[offset + j + i * (BIWIDTH(buffer) * 3 + padding)]);
             int b = 0;
             b = check_num(&buff_blue);
-            count_blue[b]++;
+            count[b]++;
 
             unsigned char buff_green = (unsigned char)(buffer[offset + j + i * (BIWIDTH(buffer) * 3 + padding)+1]);
             b = check_num(&buff_green);
-            count_green[b]++;
+            count[b+16]++;
 
             unsigned char buff_red = (unsigned char)(buffer[offset + j + i * (BIWIDTH(buffer) * 3 + padding)+2]);
             b = check_num(&buff_red);
-            count_red[b]++;
+            count[b+32]++;
             //printf("Blue: %X Green: %X Red: %X\n", buff_blue, buff_green, buff_red);
         }
     }
     // obtain sum of all pixel values to check correctness 
     int sum = 0;
     for (int i = 0; i < 16; i++)
-        sum += count_blue[i];
+        sum += count[i];
     // handle error
     if (BIHEIGHT(buffer) * BIWIDTH(buffer) != sum) {
         printf("Number of pixels in the histogram does not match number of pixels in the image");
     }
-    print_histogram_colour_data(count_blue, sum, "Blue");
-    print_histogram_colour_data(count_green, sum, "Green");
-    print_histogram_colour_data(count_red, sum, "Red");
+    print_histogram_colour_data(count, sum, "Blue");
+    print_histogram_colour_data((count+16), sum, "Green");
+    print_histogram_colour_data((count+32), sum, "Red");
 }
 void turn_file_into_grayscale(char* buffer, FILE * rfile) {
     // copy headers
