@@ -5,11 +5,9 @@
 
 ## Simplicity in usage
 Few steps how to use our application:
-1. compile file \<nazwac>.c with \<nazwah>.h
+1. compile file \<nazwac>.c 
 ```bash
-	gcc -o <nazwac>.c -c
-	gcc -o <nazwah>.h -c
-	gcc -o <executable-file-name> <nazwac>.o <nazwah>.o
+	gcc -o <executable-file-name> <nazwac>.c -c
 ```
 2.  execute with the following to obtain informations about headers, and histogram with percentage of colours:
 ```bash
