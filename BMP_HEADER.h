@@ -1,9 +1,12 @@
 #pragma once
 #define  _CRT_SECURE_NO_WARNINGS
+#define  _CRT_NONSTDC_NO_WARNINGS
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 #ifdef BFTYPE
 #undef BFTYPE
@@ -124,11 +127,6 @@ BIYPERLSPERMETER(buffer), BIYPERLSPERMETER(buffer),\
 BICLRUSED(buffer), BICLRUSED(buffer),\
 BICLRIMPORTANT(buffer), BICLRIMPORTANT(buffer));
 }
-
-static inline unsigned char check_num(unsigned char num) {
-   return num / 16;
-}
-
 void print_histogram_colour_data(int* counter, int sum, const char* mess) {
     printf("\n\n%s: \n\n", mess);
     for (int i = 0, j = 0; i < 16; j++, i++)
@@ -144,17 +142,13 @@ void generate_histogram(char* buffer) {
         // for every pixel (triple)
         for (unsigned j = 0; j < BIWIDTH(buffer) * 3; j += 3) {
             unsigned char buff_blue = (unsigned char)(buffer[offset + j + i * (BIWIDTH(buffer) * 3 + padding)]);
-            int b = 0;
-            b = check_num(buff_blue);
-            count[b]++;
+            count[buff_blue/16]++;
 
             unsigned char buff_green = (unsigned char)(buffer[offset + j + i * (BIWIDTH(buffer) * 3 + padding)+1]);
-            b = check_num(buff_green);
-            count[b+16]++;
+            count[buff_green/16+16]++;
 
             unsigned char buff_red = (unsigned char)(buffer[offset + j + i * (BIWIDTH(buffer) * 3 + padding)+2]);
-            b = check_num(buff_red);
-            count[b+32]++;
+            count[buff_red/16+32]++;
             //printf("Blue: %X Green: %X Red: %X\n", buff_blue, buff_green, buff_red);
         }
     }
@@ -164,20 +158,20 @@ void generate_histogram(char* buffer) {
         sum += count[i];
     // handle error
     if (BIHEIGHT(buffer) * BIWIDTH(buffer) != sum) {
-        printf("Number of pixels in the histogram does not match number of pixels in the image");
+        printf("[error]Number of pixels in the histogram does not match number of pixels in the image");
     }
     print_histogram_colour_data(count, sum, "Blue");
     print_histogram_colour_data((count+16), sum, "Green");
     print_histogram_colour_data((count+32), sum, "Red");
 }
-void create_a_copy_of_given_file_in_grayscale(char* buffer, FILE * rfile) {
+void turn_file_into_grayscale(char* buffer, FILE * rfile) {
     // copy headers
     fwrite(buffer, 14 + BISIZE(buffer), 1, rfile);
     int offset = BFSIZE(buffer) - BISIZEIMAGE(buffer);
     int padding = ((BIWIDTH(buffer) * 3) % 4);
     // insert pixels
-    for (int i = 0; i < BIHEIGHT(buffer); i++) {
-        for (int j = 0; j < BIWIDTH(buffer) * 3; j += 3) {
+    for (unsigned i = 0; i < BIHEIGHT(buffer); i++) {
+        for (unsigned j = 0; j < BIWIDTH(buffer) * 3; j += 3) {
             unsigned char buff_blue = (unsigned char)(buffer[offset + j + i * (BIWIDTH(buffer) * 3 + padding)]);
             unsigned char buff_green = (unsigned char)(buffer[offset + j + i * (BIWIDTH(buffer) * 3 + padding) + 1]);
             unsigned char buff_red = (unsigned char)(buffer[offset + j + i * (BIWIDTH(buffer) * 3 + padding) + 2]);
@@ -190,17 +184,23 @@ void create_a_copy_of_given_file_in_grayscale(char* buffer, FILE * rfile) {
 }
 FILE* create_a_file_from_name_stored_in_main_argument_list(char** argv, int index, const char* mode) {
     FILE* file = NULL;
-    file = fopen(argv[index], mode);
-    if (!file) {
-        printf("The file was not opened\n");
+    if (argv[index]) {
+        file = fopen(argv[index], mode);
+        if (!file) {
+            printf("[error]The file was not opened\n");
+            return NULL;
+        }
+        return file;
+    }
+    else {
+        fprintf(stderr, "Too few command line arguments");
         return NULL;
     }
-    return file;
 }
 
 int validate_file(char* buffer) {
     if (BFTYPE(buffer) != 19778) {
-        printf("This is not a BMP file");
+        printf("[error]This is not a BMP file");
         return EXIT_FAILURE;
     }
     return EXIT_SUCCESS;
