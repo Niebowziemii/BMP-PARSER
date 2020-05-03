@@ -124,39 +124,11 @@ BIYPERLSPERMETER(buffer), BIYPERLSPERMETER(buffer),\
 BICLRUSED(buffer), BICLRUSED(buffer),\
 BICLRIMPORTANT(buffer), BICLRIMPORTANT(buffer));
 }
-int check_num(unsigned char* num) {
-    int a = (int)*num;
-    _asm mov eax, a
-    _asm push ebx
-    _asm push ecx
-    _asm xor ebx, ebx
-    _asm loop_start:
-    _asm mov ecx, ebx
-    _asm imul ecx, 0x00000010
-    _asm cmp eax, ecx
-    _asm jl loop_check
-    _asm mov ecx, ebx
-    _asm inc ecx
-    _asm imul ecx, 0x00000010
-    _asm dec ecx
-    _asm cmp eax, ecx
-    _asm jg loop_check
-    _asm mov eax, ebx
-    _asm pop ecx
-    _asm pop ebx
-    _asm jmp _return_
-    _asm loop_check:
-    _asm inc ebx
-    _asm cmp ebx, 0x00000010
-    _asm jb loop_start
-    _asm pop ecx
-    _asm pop ebx
-    _asm xor eax, eax
-    _asm inc eax
-    _asm _return_:
-    _asm mov a, eax
-    return a;
+
+static inline unsigned char check_num(unsigned char num) {
+   return num / 16;
 }
+
 void print_histogram_colour_data(int* counter, int sum, const char* mess) {
     printf("\n\n%s: \n\n", mess);
     for (int i = 0, j = 0; i < 16; j++, i++)
@@ -173,15 +145,15 @@ void generate_histogram(char* buffer) {
         for (unsigned j = 0; j < BIWIDTH(buffer) * 3; j += 3) {
             unsigned char buff_blue = (unsigned char)(buffer[offset + j + i * (BIWIDTH(buffer) * 3 + padding)]);
             int b = 0;
-            b = check_num(&buff_blue);
+            b = check_num(buff_blue);
             count[b]++;
 
             unsigned char buff_green = (unsigned char)(buffer[offset + j + i * (BIWIDTH(buffer) * 3 + padding)+1]);
-            b = check_num(&buff_green);
+            b = check_num(buff_green);
             count[b+16]++;
 
             unsigned char buff_red = (unsigned char)(buffer[offset + j + i * (BIWIDTH(buffer) * 3 + padding)+2]);
-            b = check_num(&buff_red);
+            b = check_num(buff_red);
             count[b+32]++;
             //printf("Blue: %X Green: %X Red: %X\n", buff_blue, buff_green, buff_red);
         }
