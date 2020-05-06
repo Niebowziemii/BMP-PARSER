@@ -1,6 +1,6 @@
 #include "BMP_HEADER.h"
 int main(int argc, char** argv) {
-    if (argc > 1 && argc < 4) {
+    if (argc > 1 && argc < 5) {
         // create an empty file
         FILE* file = create_a_file_from_name_stored_in_main_argument_list(argv, 1, "rb");
         if (file == NULL) {
@@ -48,6 +48,20 @@ int main(int argc, char** argv) {
                     create_a_copy_of_given_file_in_grayscale(buffer, result_file);
                 else
                     printf("[error]Grayscale convertion is unsupported.");
+                fclose(result_file);
+            }
+            else {
+                printf("[error]Result file cannot be created.");
+                return EXIT_FAILURE;
+            }
+        }
+        if (argc==4){
+              FILE* result_file = create_a_file_from_name_stored_in_main_argument_list(argv, 2, "wb");
+            if (result_file) {
+                if (BICOMPRESSION(buffer) == 0 && BIBITCOUNT(buffer) == 24)
+                    steganography(buffer, result_file,*fsize);
+                else
+                    printf("[error]Steganography convertion is unsupported.");
                 fclose(result_file);
             }
             else {
