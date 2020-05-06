@@ -1,4 +1,6 @@
 #include "BMP_HEADER.h"
+#include "BMPParser.h"
+
 int main(int argc, char** argv) {
     if (argc > 1 && argc < 5) {
         // create an empty file
@@ -34,6 +36,31 @@ int main(int argc, char** argv) {
             print_data(buffer);
             if (BICOMPRESSION(buffer) == 0 && BIBITCOUNT(buffer) == 24) {
                 generate_histogram(buffer);
+
+                char character = 0;
+                printf("Decode steganography? [Y/n]\n");
+                scanf("%c", &character);
+
+                if(character == 'Y' || character == 'y')
+                {
+                    BMPFile bmp;
+                    if (bmp_create(&bmp, argv[1]))
+                    {
+                        return EXIT_FAILURE;
+                    }
+                    if (bmp_get_biBitCount(&bmp) == 24 && bmp_get_biCompression(&bmp) == 0)
+                    {
+                        decode_text(&bmp);
+                        bmp_destroy(&bmp);
+                    }
+                    else
+                    {
+                        printf("[error]Steganography convertion is unsupported.");
+                        bmp_destroy(&bmp);
+                        return EXIT_FAILURE;
+                    }
+                }
+
             }
             else {
                 printf("[error]Histogram calculation is unsupported.");
@@ -56,16 +83,21 @@ int main(int argc, char** argv) {
             }
         }
         if (argc==4){
-              FILE* result_file = create_a_file_from_name_stored_in_main_argument_list(argv, 2, "wb");
-            if (result_file) {
-                if (BICOMPRESSION(buffer) == 0 && BIBITCOUNT(buffer) == 24)
-                    steganography(buffer, result_file,*fsize);
-                else
-                    printf("[error]Steganography convertion is unsupported.");
-                fclose(result_file);
+            BMPFile bmp;
+            if (bmp_create(&bmp, argv[1]))
+            {
+                return EXIT_FAILURE;
             }
-            else {
-                printf("[error]Result file cannot be created.");
+            if (bmp_get_biBitCount(&bmp) == 24 && bmp_get_biCompression(&bmp) == 0)
+            {
+                encode_text(&bmp, argv[3]);
+                bmp_save(&bmp, argv[2]);
+                bmp_destroy(&bmp);
+            }
+            else
+            {
+                printf("[error]Steganography convertion is unsupported.");
+                bmp_destroy(&bmp);
                 return EXIT_FAILURE;
             }
         }
