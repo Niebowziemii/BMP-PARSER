@@ -638,3 +638,213 @@ set_pixel_byte(file, pixel_height, pixel_width, 1, value)
 set_pixel_byte(file, pixel_height, pixel_width, 0, value)
 
 #endif
+
+/* STEGANOGRAPHY */
+
+#if !defined(PIXEL_MOVE)
+#undef PIXEL_MOVE
+#endif 
+#define PIXEL_MOVE(COLUMN, ROW, WIDTH) \
+++COLUMN; \
+if(COLUMN == WIDTH) \
+{ \
+    COLUMN = 0; \
+    ++ROW; \
+}
+
+#if !defined(GET_NTH_BIT_VALUE)
+#undef GET_NTH_BIT_VALUE
+#endif 
+#define GET_NTH_BIT_VALUE(VARIABLE, INDEX) (VARIABLE >> INDEX) & 1
+
+#if !defined(SET_NTH_BIT_VALUE_IF_TRUE)
+#undef SET_NTH_BIT_VALUE_IF_TRUE
+#endif 
+#define SET_NTH_BIT_VALUE_IF_TRUE(VARIABLE, INDEX, CONDITION) if (CONDITION) { VARIABLE |= 1UL << INDEX; }
+
+
+#if !defined(SET_LAST_BIT_ZERO)
+#undef SET_LAST_BIT_ZERO
+#endif 
+#define SET_LAST_BIT_ZERO(VARIABLE) VARIABLE & ~1
+
+#if !defined(SET_LAST_BIT_ONE)
+#undef SET_LAST_BIT_ONE
+#endif 
+#define SET_LAST_BIT_ONE(VARIABLE) VARIABLE | 1
+
+#if !defined(SET_NTH_BIT)
+#undef SET_NTH_BIT
+#endif
+#define SET_NTH_BIT(INDEX, VARIABLE, BIT) GET_NTH_BIT_VALUE(VARIABLE, INDEX) ? SET_LAST_BIT_ONE(BIT) : SET_LAST_BIT_ZERO(BIT)
+
+
+void encode_text(BMPFile* file, const char * text)
+{
+    if (bmp_get_biBitCount(file) == 24 && bmp_get_biCompression(file) == 0)
+    {
+        uint32_t text_size = strlen(text);
+        uint32_t required_size = text_size + 4;
+
+        uint32_t available_size = bmp_get_biHeight(file) * bmp_get_biWidth(file) * 3;
+
+        if (required_size > available_size)
+        {
+            printf("Unable to write given text");
+            return;
+        }
+
+        int8_t* to_encode = (int8_t*)malloc(required_size * sizeof(int8_t));
+
+        if (to_encode == NULL)
+        {
+            printf("Unable to allocate memory");
+            return;
+        }
+
+        memcpy(to_encode, &text_size, text_size * sizeof(int8_t));
+        memcpy(&to_encode[4], text, text_size);
+
+        int32_t height_pixels = bmp_get_biHeight(file);
+        int32_t width_pixels = bmp_get_biWidth(file);
+
+        int32_t row = 0;
+        uint32_t column = 0;
+        uint8_t bit = 0;
+
+        for (uint32_t bytes = 0; bytes < required_size; bytes++)
+        {
+            bit = BMP_GET_PIXEL_BLUE_COLOR(file, row, column);
+            BMP_SET_PIXEL_BLUE_COLOR(file, row, column, SET_NTH_BIT(0, to_encode[bytes], bit));
+
+            bit = BMP_GET_PIXEL_GREEN_COLOR(file, row, column);
+            BMP_SET_PIXEL_GREEN_COLOR(file, row, column, SET_NTH_BIT(1, to_encode[bytes], bit));
+
+            bit = BMP_GET_PIXEL_RED_COLOR(file, row, column);
+            BMP_SET_PIXEL_RED_COLOR(file, row, column, SET_NTH_BIT(2, to_encode[bytes], bit));
+
+            PIXEL_MOVE(column, row, width_pixels);
+
+            bit = BMP_GET_PIXEL_BLUE_COLOR(file, row, column);
+            BMP_SET_PIXEL_BLUE_COLOR(file, row, column, SET_NTH_BIT(3, to_encode[bytes], bit));
+
+            bit = BMP_GET_PIXEL_GREEN_COLOR(file, row, column);
+            BMP_SET_PIXEL_GREEN_COLOR(file, row, column, SET_NTH_BIT(4, to_encode[bytes], bit));
+
+            bit = BMP_GET_PIXEL_RED_COLOR(file, row, column);
+            BMP_SET_PIXEL_RED_COLOR(file, row, column, SET_NTH_BIT(5, to_encode[bytes], bit));
+   
+            PIXEL_MOVE(column, row, width_pixels);
+
+            bit = BMP_GET_PIXEL_BLUE_COLOR(file, row, column);
+            BMP_SET_PIXEL_BLUE_COLOR(file, row, column, SET_NTH_BIT(6, to_encode[bytes], bit));
+
+            bit = BMP_GET_PIXEL_GREEN_COLOR(file, row, column);
+            BMP_SET_PIXEL_GREEN_COLOR(file, row, column, SET_NTH_BIT(7, to_encode[bytes], bit));
+
+            PIXEL_MOVE(column, row, width_pixels);
+        }
+    }
+    else
+    {
+        printf("Steganography can be perform only for uncompressed 24-bytes bitmaps");
+    }
+}
+
+int8_t load_byte(BMPFile* file, int32_t * row, uint32_t * column)
+{
+    int32_t width_pixels = bmp_get_biWidth(file);
+    int32_t row_buff = *row, column_buff = *column;
+    int8_t byte = 0, bit = 0;
+    
+    bit = BMP_GET_PIXEL_BLUE_COLOR(file, row_buff, column_buff);
+    bit = GET_NTH_BIT_VALUE(bit, 0);
+    SET_NTH_BIT_VALUE_IF_TRUE(byte, 0, bit);
+
+    bit = BMP_GET_PIXEL_GREEN_COLOR(file, row_buff, column_buff);
+    bit = GET_NTH_BIT_VALUE(bit, 0);
+    SET_NTH_BIT_VALUE_IF_TRUE(byte, 1, bit);
+
+    bit = BMP_GET_PIXEL_RED_COLOR(file, row_buff, column_buff);
+    bit = GET_NTH_BIT_VALUE(bit, 0);
+    SET_NTH_BIT_VALUE_IF_TRUE(byte, 2, bit);
+    
+    PIXEL_MOVE(column_buff, row_buff, width_pixels);
+
+    bit = BMP_GET_PIXEL_BLUE_COLOR(file, row_buff, column_buff);
+    bit = GET_NTH_BIT_VALUE(bit, 0);
+    SET_NTH_BIT_VALUE_IF_TRUE(byte, 3, bit);
+
+    bit = BMP_GET_PIXEL_GREEN_COLOR(file, row_buff, column_buff);
+    bit = GET_NTH_BIT_VALUE(bit, 0);
+    SET_NTH_BIT_VALUE_IF_TRUE(byte, 4, bit);
+
+    bit = BMP_GET_PIXEL_RED_COLOR(file, row_buff, column_buff);
+    bit = GET_NTH_BIT_VALUE(bit, 0);
+    SET_NTH_BIT_VALUE_IF_TRUE(byte, 5, bit);
+
+    PIXEL_MOVE(column_buff, row_buff, width_pixels);
+
+    bit = BMP_GET_PIXEL_BLUE_COLOR(file, row_buff, column_buff);
+    bit = GET_NTH_BIT_VALUE(bit, 0);
+    SET_NTH_BIT_VALUE_IF_TRUE(byte, 6, bit);
+
+    bit = BMP_GET_PIXEL_GREEN_COLOR(file, row_buff, column_buff);
+    bit = GET_NTH_BIT_VALUE(bit, 0);
+    SET_NTH_BIT_VALUE_IF_TRUE(byte, 7, bit);
+
+    PIXEL_MOVE(column_buff, row_buff, width_pixels);
+
+    *row = row_buff;
+    *column = column_buff;
+
+    return byte;
+}
+
+void decode_text(BMPFile* file)
+{
+    if (bmp_get_biBitCount(file) == 24 && bmp_get_biCompression(file) == 0)
+    {
+        int8_t text_size[4];
+        memset(text_size, 0, 4 * sizeof(int8_t));
+
+        int32_t row = 0;
+        uint32_t column = 0;
+
+        text_size[0] = load_byte(file, &row, &column);
+        text_size[1] = load_byte(file, &row, &column);
+        text_size[2] = load_byte(file, &row, &column);
+        text_size[3] = load_byte(file, &row, &column);
+
+        int32_t* text_size_ptr = (int32_t *)&text_size;
+
+        uint32_t available_size = bmp_get_biHeight(file) * bmp_get_biWidth(file) * 3;
+
+        if (*text_size_ptr > available_size || !*text_size_ptr)
+        {
+            printf("Incorrect text size");
+            return;
+        }
+
+        int8_t* text = (int8_t *)malloc((*text_size_ptr + 1) * sizeof(int8_t));
+
+        if (text == NULL)
+        {
+            printf("Unable to allocate memory");
+            return;
+        }
+        
+        for (uint32_t i = 0; i < *text_size_ptr; i++)
+        {
+            text[i] = load_byte(file, &row, &column);
+        }
+
+        text[*text_size_ptr] = 0;
+
+        printf("Steganography Message: '%s'", text);
+    }
+    else
+    {
+        printf("Steganography can be perform only for uncompressed 24-bytes bitmaps");
+    }
+}
