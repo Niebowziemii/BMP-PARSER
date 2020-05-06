@@ -2,6 +2,7 @@
 ### Authors 
 ##### Rafał Stachowiak - creator of the printable headers, histogram creation and grayscale image alghorytm in main.c and BMP_HEADER.h
 ##### Franciszek Olejnik - creator of the steganography part and Windows OS supportive functions covering I/O api in BMPParser.h
+##### https://github.com/FrankOil/BMPParser
 
 ## Simplicity in usage
 Few steps how to use our application:
